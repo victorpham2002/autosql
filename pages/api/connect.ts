@@ -20,6 +20,7 @@ export default async function handler(req, res) {
         // console.log(`Connected to database: ${connectedDatabase}`);
         return res.status(200).json(result);
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: 'Failed to connect to the database' });
     }
   
