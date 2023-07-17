@@ -1,6 +1,7 @@
 import {useState, useEffect} from "react"
 import { useAuth } from "@/context/AuthContext"
 import Link from "next/link"
+import router from "next/router"
 
 const SignUp = () => {
     const [email, setEmail] = useState("")
@@ -15,6 +16,7 @@ const SignUp = () => {
         try{
             await signup(email,password)
             setError("")
+            router.push("/login")
         }catch(err){
             console.log(err)
             
