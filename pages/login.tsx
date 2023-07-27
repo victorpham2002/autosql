@@ -7,7 +7,7 @@ export default function Login (){
     const [email, setEmail] = useState("")
     const [error, setError] = useState("")
     const [password, setPassword] = useState("")
-    const {user, login} = useAuth()
+    const {currentUser, login} = useAuth()
     const router = useRouter()
     const handleSubmit = async (e: any) => {
         e.preventDefault()
@@ -24,7 +24,7 @@ export default function Login (){
     }
     return(
         <div className="flex flex-col justify-center items-center w-full h-screen">
-            {error && <div className="text-red-600 bg-background p-4 border-2 border-red-500">{error}</div>}
+            {error && <div className="text-red-600 bg-red-100 rounded-lg p-4 border-2 border-red-500">{error}</div>}
             <form className="flex items-center flex-col" onSubmit={handleSubmit}>
                 <input type="email" className="border-2 bg-gray-200 placeholder-black rounded-3xl p-4 m-4 w-full sm:w-80" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email"/>
                 <input type="password" className="border-2 bg-gray-200 placeholder-black rounded-3xl p-4 m-4 w-full sm:w-80" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password"/>

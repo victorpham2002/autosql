@@ -17,7 +17,6 @@ export default async function handler(req, res) {
         const result = await prisma.$queryRaw`SELECT table_name, column_name, data_type
         FROM information_schema.columns
         WHERE table_schema = 'public' ORDER BY table_name;`;
-        // console.log(`Connected to database: ${connectedDatabase}`);
         return res.status(200).json(result);
     } catch (error) {
         console.log(error)

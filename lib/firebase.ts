@@ -10,14 +10,6 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
-// const firebaseConfig = {
-//   apiKey: "AIzaSyAV4yz0ZTcDux5YwsY8QZa2cMNIiBcZXnk",
-//   authDomain: "nextjs-autosql.firebaseapp.com",
-//   projectId: "nextjs-autosql",
-//   storageBucket: "nextjs-autosql.appspot.com",
-//   messagingSenderId: "564230126798",
-//   appId: "1:564230126798:web:5e0c1ea95358041e76e49f"
-// };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);

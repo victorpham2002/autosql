@@ -1,7 +1,7 @@
 import Link from "next/link"
-
+import { useAuth } from "@/context/AuthContext"
 const Home: React.FC = () => {
-
+    const {currentuser} = useAuth()
     return (
         <div className="flex flex-col justify-center items-center h-screen">
             <div className="text-center font-bold text-2xl sm:text-3xl">
@@ -13,7 +13,7 @@ const Home: React.FC = () => {
                 Connect to your database, explore tables, and retrieve data effortlessly.
             </div>
             <button className="rounded-lg bg-button hover:bg-red-300 p-2">
-                <Link href="/login" className="text-white">Get Started</Link>
+                <Link href={`${currentuser ? '/connect' : '/login'} `} className="text-white">Get Started</Link>
             </button>
         </div>
   )

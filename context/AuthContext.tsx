@@ -11,19 +11,19 @@ export const AuthContextProvider = ({
 } : {
     children: React.ReactNode
 }) => {
-    const [user, setUser] = useState<any>(null)
+    const [currentuser, setCurrentUser] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user){
-                setUser({
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName
+        const unsubscribe = onAuthStateChanged(auth, (currentuser) => {
+            if (currentuser){
+                setCurrentUser({
+                    uid: currentuser.uid,
+                    email: currentuser.email,
+                    displayName: currentuser.displayName
                 })
             }else{
-                setUser(null)
+                setCurrentUser(null)
             }
             setLoading(false)
         })
@@ -38,11 +38,11 @@ export const AuthContextProvider = ({
         return signInWithEmailAndPassword(auth, email, password)
     }
     const logout = async () => {
-        setUser(null)
+        setCurrentUser(null)
         await signOut(auth)
     }
     return(
-        <AuthContext.Provider value={{user, signup, login, logout}}>
+        <AuthContext.Provider value={{currentuser, signup, login, logout}}>
             {loading? null: children} 
         </AuthContext.Provider>
     )

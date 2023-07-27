@@ -7,19 +7,17 @@ const SignUp = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
-    // const [fname, setFName] = useState("")
-    // const [lname, setLName] = useState("")
-    const {user, signup} = useAuth()
+    const {signup, logout} = useAuth()
     
     const handleSubmit = async (e: any) => {
         e.preventDefault()
         try{
             await signup(email,password)
+            logout()
             setError("")
             router.push("/login")
         }catch(err){
             console.log(err)
-            
             if (err.message === "Firebase: Error (auth/email-already-in-use).") { setError("The email you enter is already existed. Please use another email.") }
             else { setError("There is some error signing you up. Please try again.") }
         }
