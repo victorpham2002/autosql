@@ -23,6 +23,7 @@ const ChattingLog = () => {
 
   const queryTable = async () => {
     setTable([])
+    setError('')
     setIsLoading(true);
     try{
       const res = await fetch('/api/table', {
@@ -55,6 +56,13 @@ const ChattingLog = () => {
   }, [modalMessage]);
   useEffect(() => {
     // Fetch the chat history from Firestore when the component is mounted
+    // const hostInfoMessages = [
+    //   { role: 'dbname', content: hostInfo.dbname },
+    //   { role: 'username', content: hostInfo.username },
+    //   { role: 'host', content: hostInfo.host }
+    // ];
+    // const chatHistoryRef = doc(db, 'chat history', currentuser.uid);
+    // setDoc(chatHistoryRef, { chatLog: hostInfoMessages }, { merge: true });
     const fetchChatHistory = async () => {
       try {
         const chatHistoryRef = doc(db, 'chat history', currentuser.uid);
@@ -82,8 +90,10 @@ const ChattingLog = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const filterRoles = ["user", "assistant", "system"];
+
     const updatedChatLog = [...chatLog, { role: 'user', content: content}]
-    const sliceChatLog = updatedChatLog.slice(-MAX_LITMIT_MESSAGES)
+    const sliceChatLog = updatedChatLog.slice(-MAX_LITMIT_MESSAGES).filter(message => filterRoles.includes(message.role));
     setDisplayChatLog((prevChatLog) => [...prevChatLog, { role: 'user', content: content }]);
     const res = await fetch('/api/openai', {
       method: 'POST',
@@ -111,7 +121,7 @@ const ChattingLog = () => {
   };
 
   return (
-    <div className="container mx-auto w-full m-4 mt-24 mb-20">
+    <div className="container mx-auto w-full m-4 mb-20">
       <div className="flex flex-col space-y-4">
         {displayChatLog.map((message, index) => (
           <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start flex flex-row  items-center'}`}>

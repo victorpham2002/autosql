@@ -8,7 +8,9 @@ const Header: React.FC = () => {
   const router = useRouter()
 
   return (
-    <div className="flex flex-row items-center justify-between border-b-1 p-4 fixed w-full z-30 shadow bg-white">
+    <div className="bg-white shadow">
+    <div className="container mx-auto p-4">
+    <div className="flex flex-row items-center justify-between border-b-1">
       <div className="items-center font-bold">
         <a href="/" className="text-2xl md:text-3xl text-logo">AutoSQL</a>
       </div>
@@ -38,6 +40,8 @@ const Header: React.FC = () => {
           }
         </ul>
       </div>
+    </div>
+    </div>
     </div>
   );
 };

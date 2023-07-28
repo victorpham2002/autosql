@@ -186,7 +186,7 @@ const ConnectDatabasePage: React.FC = () => {
                   <div className="flex justify-center">
                     <button
                       type="button"
-                      className="rounded-xl bg-button hover:bg-red-300 p-2 mt-8 outline-none"
+                      className="rounded-xl bg-button hover:bg-red-300 p-2 px-6 mt-8 outline-none"
                       onClick={() => {
                         const formInfo = { user, password, host, port, dbname };
                         saveInfoToFirestore(formInfo);
@@ -196,7 +196,7 @@ const ConnectDatabasePage: React.FC = () => {
                     </button>
                     <button 
                       type="button" 
-                      className="rounded-xl bg-button hover:bg-red-300 p-2 mt-8 outline-none" 
+                      className="rounded-xl bg-button hover:bg-red-300 p-2 mt-8 outline-none mx-3" 
                       onClick={handleFetchSavedData}>Favourite</button>
                     <button className="rounded-xl bg-button hover:bg-red-300 p-2 mt-8" type="submit">Connect</button>
                   </div>

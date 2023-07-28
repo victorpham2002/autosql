@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { messages } = req.body
+    console.log(messages)
     if (req.method !== "POST") {
         return res.status(400).json({error: 'Invalid Request'})
     }
