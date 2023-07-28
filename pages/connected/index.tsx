@@ -121,8 +121,13 @@ const ChattingLog = () => {
   };
 
   return (
-    <div className="container mx-auto w-full m-4 mb-20">
-      <div className="flex flex-col space-y-4">
+    <div className="container mx-auto w-full mb-20 mt-20">
+      <div className="sticky top-0 z-20 bg-slate-200 mb-2 flex flex-col">
+        <div><b>Database name: </b>{hostInfo.dbname}</div>
+        <div><b>Username: </b>{hostInfo.user} </div>
+        <div><b>Host:</b> {hostInfo.host}</div>
+      </div>
+      <div className="flex flex-col">
         {displayChatLog.map((message, index) => (
           <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start flex flex-row  items-center'}`}>
             <div className={`${message.role === 'user' ? 'bg-button text-white lg:mr-10' : 'lg:ml-10 border-2 border-slate-500'} relative rounded-xl p-3 max-w-[280px] md:max-w-md `}>
@@ -139,12 +144,11 @@ const ChattingLog = () => {
                   </button>
               )}
             </div>
-              {message.role !== 'user' && (
+              {/* {message.role !== 'user' && (
                   <button className="bg-button hover:bg-red-300 outline-none p-2 ml-2 text-white rounded-xl hidden md:block" 
                   onClick={() => {
                     setModalMessage(message.content);
                     setModalOpen(true);
-                    // queryTable()
                   }}>
                     <FontAwesomeIcon
                       icon={faMagnifyingGlass}
@@ -153,7 +157,7 @@ const ChattingLog = () => {
                     />
                   </button>
                 )
-              }
+              } */}
               {
                 modalOpen && 
                 <FavoriteModal isOpen={modalOpen} handleClose={() => setModalOpen(!modalOpen)}>

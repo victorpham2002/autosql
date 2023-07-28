@@ -3,7 +3,7 @@ import { useAuth } from "@/context/AuthContext"
 const Home: React.FC = () => {
     const {currentuser} = useAuth()
     return (
-        <div className="flex flex-col justify-center items-center h-screen">
+        <div className="flex flex-col justify-center items-center h-screen relative z-0">
             <div className="text-center font-bold text-2xl sm:text-3xl">
                 Simplify Your Database Queries
             </div>

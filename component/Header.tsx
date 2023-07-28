@@ -8,7 +8,7 @@ const Header: React.FC = () => {
   const router = useRouter()
 
   return (
-    <div className="bg-white shadow">
+    <div className="bg-white shadow z-10 fixed top-0 left-0 right-0">
     <div className="container mx-auto p-4">
     <div className="flex flex-row items-center justify-between border-b-1">
       <div className="items-center font-bold">
