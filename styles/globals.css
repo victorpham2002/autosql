@@ -3,6 +3,6 @@
 @tailwind utilities;
 
 .bg-black {
-    --tw-bg-opacity: 0.3;
+    --tw-bg-opacity: 0.5;
     background-color: rgb(0 0 0 / var(--tw-bg-opacity));
 }

@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext"
 import { db } from '../lib/firebase'
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faCircleCheck, faTrashCan } from "@fortawesome/free-solid-svg-icons"
+import { faBars, faCircleCheck, faTrashCan } from "@fortawesome/free-solid-svg-icons"
 
 const ConnectDatabasePage: React.FC = () => {
     const router = useRouter()
@@ -161,7 +161,10 @@ const ConnectDatabasePage: React.FC = () => {
     return (
           <div className="flex items-center justify-center flex-col h-screen w-screen">
             <div className="flex flex-col items-center bg-background w-full rounded-xl min-[540px]:w-1/2">
+              <div className="flex flex-row">
+              <div className="flex flex-col items-center justify-center">
               <h1 className="text-xl font-semibold mt-6 ">Enter your database information</h1>
+
               <form className="m-4" onSubmit={handleSubmit}>
                   <div>
                       <label className="">Database name</label>
@@ -186,23 +189,33 @@ const ConnectDatabasePage: React.FC = () => {
                   <div className="flex justify-center">
                     <button
                       type="button"
-                      className="rounded-xl bg-button hover:bg-red-300 p-2 px-6 mt-8 outline-none"
+                      className="rounded-xl text-white bg-button hover:bg-red-300 p-2 px-6 mt-8 outline-none mx-1"
                       onClick={() => {
                         const formInfo = { user, password, host, port, dbname };
                         saveInfoToFirestore(formInfo);
-                      }}
-                    >
+                      }}>
                       Save
                     </button>
-                    <button 
-                      type="button" 
-                      className="rounded-xl bg-button hover:bg-red-300 p-2 mt-8 outline-none mx-3" 
-                      onClick={handleFetchSavedData}>Favourite</button>
-                    <button className="rounded-xl bg-button hover:bg-red-300 p-2 mt-8" type="submit">Connect</button>
+                    
+                    <button className="text-white rounded-xl bg-button hover:bg-red-300 p-2 mt-8 mx-1" type="submit">Connect</button>
                   </div>
               </form>
+              </div>
+              <div>
+              <button 
+                      type="button" 
+                      className="rounded-xl bg-button p-1 mt-8 hover:bg-red-300 outline-none mx-3" 
+                      onClick={handleFetchSavedData}>
+                <FontAwesomeIcon
+                  icon={faBars}
+                  style={{fontSize: 18}}
+                  className="text-white"
+                /></button>
+              </div>
+              </div>
               {error && <div className="w-full text-center text-xl pb-2">{error}</div>}
               </div>
+
               {
                 modalOpen && 
                 <FavoriteModal isOpen={modalOpen} handleClose={() => setModalOpen(!modalOpen)}>

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import FavoriteModal from "@/component/FavoriteModal"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faCopy, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faCopy,  faPlay } from '@fortawesome/free-solid-svg-icons';
 import { db } from '../../lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
+import Accordion from '@/component/Accordion';
 const ChattingLog = () => {
   const storedData = localStorage.getItem('tableData')
   const storeInfo = localStorage.getItem('info')
@@ -20,7 +21,14 @@ const ChattingLog = () => {
   const MAX_LITMIT_MESSAGES = 10
   const { currentuser } = useAuth()
   const [isLoading, setIsLoading] = useState(false);
-
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const handleChange = () => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
   const queryTable = async () => {
     setTable([])
     setError('')
@@ -55,14 +63,6 @@ const ChattingLog = () => {
     }
   }, [modalMessage]);
   useEffect(() => {
-    // Fetch the chat history from Firestore when the component is mounted
-    // const hostInfoMessages = [
-    //   { role: 'dbname', content: hostInfo.dbname },
-    //   { role: 'username', content: hostInfo.username },
-    //   { role: 'host', content: hostInfo.host }
-    // ];
-    // const chatHistoryRef = doc(db, 'chat history', currentuser.uid);
-    // setDoc(chatHistoryRef, { chatLog: hostInfoMessages }, { merge: true });
     const fetchChatHistory = async () => {
       try {
         const chatHistoryRef = doc(db, 'chat history', currentuser.uid);
@@ -80,12 +80,22 @@ const ChattingLog = () => {
 
     fetchChatHistory();
   }, [currentuser]);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Function to scroll to the bottom of the messages
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   useEffect(() => {
     if (displayChatLog.length === 0) {
       return;
     }
     const chatHistoryRef = doc(db, 'chat history', currentuser.uid);
     setDoc(chatHistoryRef, { chatLog: displayChatLog }, { merge: true });
+    scrollToBottom()
   }, [displayChatLog])
 
   const handleSubmit = async (e) => {
@@ -122,14 +132,18 @@ const ChattingLog = () => {
 
   return (
     <div className="container mx-auto w-full mb-20 mt-20">
-      <div className="sticky top-0 z-20 bg-slate-200 mb-2 flex flex-col">
+      <div className='flex justify-center items-center sticky top-20 z-20 '>
+      <Accordion title={<>
+        <div><b>Database name: </b>{hostInfo.dbname}</div>
+      </>}>
         <div><b>Database name: </b>{hostInfo.dbname}</div>
         <div><b>Username: </b>{hostInfo.user} </div>
         <div><b>Host:</b> {hostInfo.host}</div>
+      </Accordion>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col space-y-4">
         {displayChatLog.map((message, index) => (
-          <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start flex flex-row  items-center'}`}>
+          <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start flex flex-row items-center'}`}>
             <div className={`${message.role === 'user' ? 'bg-button text-white lg:mr-10' : 'lg:ml-10 border-2 border-slate-500'} relative rounded-xl p-3 max-w-[280px] md:max-w-md `}>
               <div className={`${message.role != 'user' ? "pr-4" : "" }`}>{message.content}</div>
               {message.role !== 'user' && (<button className="absolute top-0 right-0 outline-none m-1 px-1 text-button rounded-xl" 
@@ -144,21 +158,24 @@ const ChattingLog = () => {
                   </button>
               )}
             </div>
-              {/* {message.role !== 'user' && (
+              {message.role !== 'user' && (
                   <button className="bg-button hover:bg-red-300 outline-none p-2 ml-2 text-white rounded-xl hidden md:block" 
                   onClick={() => {
                     setModalMessage(message.content);
                     setModalOpen(true);
                   }}>
                     <FontAwesomeIcon
-                      icon={faMagnifyingGlass}
+                      icon={faPlay}
                       style={{fontSize: 18}}
                       className="hover:bg-red-300"
                     />
                   </button>
                 )
-              } */}
-              {
+              }
+              
+          </div>
+        ))}
+        {
                 modalOpen && 
                 <FavoriteModal isOpen={modalOpen} handleClose={() => setModalOpen(!modalOpen)}>
                   <div className="flex flex-col justify-between h-full w-full">
@@ -191,17 +208,21 @@ const ChattingLog = () => {
                   </div>
                 </FavoriteModal>
               }
-          </div>
-        ))}
+        <div ref={messagesEndRef} />
       </div>
       
-      <form className="bg-white shadow border-t-2 rounded p-3 fixed bottom-0 left-0 w-full" onSubmit={handleSubmit}>
-        <div className="flex rounded-3xl border border-gray-700 mx-auto w-3/4">
+      <form className="flex justify-center items-center bg-white shadow border-t-2 rounded p-3 fixed bottom-0 left-0 w-full" onSubmit={handleSubmit}>
+        <div className="flex rounded-3xl border border-gray-700  w-3/4">
           <textarea
+            ref={textareaRef}
+            role='textbox'
             rows={1}
-            className="flex-grow resize-none px-4 py-2 bg-transparent text-black focus:outline-none"
+            className="flex-grow h-auto resize-none overflow-y-auto max-h-[80px] px-4 py-2 bg-transparent text-black focus:outline-none"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              handleChange();
+            }}
             placeholder="Input your data requirements here"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -209,13 +230,14 @@ const ChattingLog = () => {
               }
             }}
           ></textarea>
-          <button
+          
+        </div>
+        <button
             type="submit"
             className="bg-button rounded-3xl text-white px-4 py-2 font-semibold focus:outline-none hover:bg-red-300 transition-colors duration-300"
           >
             Ask
           </button>
-        </div>
       </form>
     </div>
   );
