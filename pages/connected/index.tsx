@@ -207,7 +207,7 @@ const ChattingLog = () => {
               <div className={`${message.role != "user" ? "pr-4" : ""}`}>
                 {message.content}
               </div>
-              {message.role !== "user" && (
+              {/* {message.role !== "user" && (
                 <button
                   className="absolute top-0 right-0 outline-none m-1 px-1 text-button rounded-xl"
                   onClick={() => {
@@ -220,11 +220,24 @@ const ChattingLog = () => {
                     className="hover:text-red-300"
                   />
                 </button>
-              )}
+              )} */}
             </div>
             {message.role !== "user" && (
+              <div className="flex flex-row  items-start">
+                <button
+                  className="m-1 px-1 text-button rounded-xl"
+                  onClick={() => {
+                    navigator.clipboard.writeText(message.content);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faCopy}
+                    style={{ fontSize: 16 }}
+                    className="hover:text-red-300"
+                  />
+                </button>
               <button
-                className="bg-button hover:bg-red-300 outline-none p-2 ml-2 text-white rounded-xl hidden md:block"
+                className="bg-button hover:bg-red-300 outline-none p-2 text-white rounded-xl hidden md:block"
                 onClick={() => {
                   setModalMessage(message.content);
                   setModalOpen(true);
@@ -236,6 +249,7 @@ const ChattingLog = () => {
                   className="hover:bg-red-300"
                 />
               </button>
+              </div>
             )}
           </div>
         ))}

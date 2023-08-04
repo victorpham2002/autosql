@@ -13,7 +13,7 @@ const Accordion: React.FC<AccordionProps> = ({ title, children }) => {
   };
 
   return (
-    <div className="cursor-pointer w-1/3 mb-2 flex flex-col bg-background rounded-xl border border-gray-400">
+    <div className="cursor-pointer w-5/6 md:w-1/3 mb-2 flex flex-col bg-background rounded-xl border border-gray-400">
       <div onClick={toggleAccordion} className="flex justify-center p-1">
         {title}
       </div>
