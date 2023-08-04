@@ -1,6 +1,4 @@
-import { faExclamation } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface AccordionProps {
   title: React.ReactNode;
@@ -16,7 +14,7 @@ const Accordion: React.FC<AccordionProps> = ({ title, children }) => {
 
   return (
     <div className="cursor-pointer w-1/3 mb-2 flex flex-col bg-background rounded-xl border border-gray-400">
-      <div onClick={toggleAccordion} className='flex justify-center p-1'>
+      <div onClick={toggleAccordion} className="flex justify-center p-1">
         {title}
       </div>
       {accordionOpen && (
