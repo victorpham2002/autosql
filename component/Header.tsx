@@ -19,22 +19,22 @@ const Header: React.FC = () => {
           {currentuser? 
           <>
             <li className="text-center md:mx-1">
-              <Link href="/connect" className="rounded-3xl p-2 hover:bg-slate-200 border-2 md:flex md:py-2 md:px-6">Disconnect</Link>
+              <Link href="/connect" className="rounded-xl p-2 hover:bg-slate-200 border-2 md:flex md:py-2 md:px-6">Disconnect</Link>
             </li>
             <li className="text-center text-white md:mx-1">
               <Link onClick={() => {
                   logout();
                   router.push("/login");
-                } } className="bg-button p-2 hover:bg-red-300 rounded-3xl md:flex md:py-2 md:px-6" href={""}>Log out</Link>
+                } } className="bg-button p-2 hover:bg-red-300 rounded-xl md:flex md:py-2 md:px-6" href={""}>Log out</Link>
             </li>
           </>
           :
           <>
             <li className="text-center mx-1">
-              <Link href="/login" className="rounded-3xl p-2 hover:bg-slate-200 border-2 md:flex md:py-2 md:px-6">Log in</Link>
+              <Link href="/login" className="rounded-xl p-2 hover:bg-slate-200 border-2 md:flex md:py-2 md:px-6">Log in</Link>
             </li>
             <li className="text-center text-white mx-1">
-              <Link href="/signup" className="bg-button p-2 hover:bg-red-300 rounded-3xl md:flex md:py-2 md:px-6">Sign up</Link>
+              <Link href="/signup" className="bg-button p-2 hover:bg-red-300 rounded-xl md:flex md:py-2 md:px-6">Sign up</Link>
             </li>
           </>
           }

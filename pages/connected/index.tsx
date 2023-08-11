@@ -9,8 +9,10 @@ import Accordion from "@/component/Accordion";
 const ChattingLog = () => {
   const storedData = localStorage.getItem("tableData");
   const storeInfo = localStorage.getItem("info");
+  const databaseID = localStorage.getItem("dbID");
   const tableData = JSON.parse(storedData);
   const hostInfo = JSON.parse(storeInfo);
+  const dbID = JSON.parse(databaseID);
   const [content, setContent] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -65,7 +67,9 @@ const ChattingLog = () => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const chatHistoryRef = doc(db, "chat history", currentuser.uid);
+        console.log(dbID)
+        if (dbID){
+        const chatHistoryRef = doc(db, "chatHistory", currentuser.uid, "databases", dbID);
         const docSnap = await getDoc(chatHistoryRef);
         if (docSnap.exists()) {
           const chatHistoryData = docSnap.data();
@@ -73,6 +77,7 @@ const ChattingLog = () => {
           setDisplayChatLog(chatHistoryData.chatLog || []);
           setChatLog(chatHistoryData.chatLog || []);
         }
+      }
       } catch (error) {
         console.error("Error fetching chat history from Firestore:", error);
       }
@@ -93,9 +98,11 @@ const ChattingLog = () => {
     if (displayChatLog.length === 0) {
       return;
     }
-    const chatHistoryRef = doc(db, "chat history", currentuser.uid);
+    if (dbID){
+    const chatHistoryRef = doc(db, "chatHistory", currentuser.uid, "databases", dbID);
     setDoc(chatHistoryRef, { chatLog: displayChatLog }, { merge: true });
     scrollToBottom();
+    }
   }, [displayChatLog]);
 
   const handleSubmit = async (e) => {
@@ -207,7 +214,7 @@ const ChattingLog = () => {
               <div className={`${message.role != "user" ? "pr-4" : ""}`}>
                 {message.content}
               </div>
-              {/* {message.role !== "user" && (
+              {message.role !== "user" && (
                 <button
                   className="absolute top-0 right-0 outline-none m-1 px-1 text-button rounded-xl"
                   onClick={() => {
@@ -220,24 +227,12 @@ const ChattingLog = () => {
                     className="hover:text-red-300"
                   />
                 </button>
-              )} */}
+              )}
             </div>
             {message.role !== "user" && (
-              <div className="flex flex-row  items-start">
-                <button
-                  className="m-1 px-1 text-button rounded-xl"
-                  onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faCopy}
-                    style={{ fontSize: 16 }}
-                    className="hover:text-red-300"
-                  />
-                </button>
+              <div className="flex flex-row items-start">
               <button
-                className="bg-button hover:bg-red-300 outline-none p-2 text-white rounded-xl hidden md:block"
+                className="bg-button hover:bg-red-300 outline-none m-1 px-2 py-1 text-white rounded-full hidden md:block"
                 onClick={() => {
                   setModalMessage(message.content);
                   setModalOpen(true);
@@ -259,6 +254,7 @@ const ChattingLog = () => {
             handleClose={() => setModalOpen(!modalOpen)}
           >
             <div className="flex flex-col justify-between h-full w-full">
+              <div className="text-center text-xl font-bold">50 first query result</div>
               <div className=" overflow-y-auto overflow-x-auto">
                 {error && (
                   <div className="w-full text-center text-3xl m-8">{error}</div>
@@ -268,6 +264,7 @@ const ChattingLog = () => {
                     Loading...
                   </div>
                 ) : (
+                <div>
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700t">
                     <thead>
                       <tr className="font-semibold">
@@ -283,7 +280,7 @@ const ChattingLog = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {table.map((row, index) => (
+                      {table.slice(0, 50).map((row, index) => (
                         <tr key={index}>
                           {Object.values(row).map((value, colIndex) => (
                             <td
@@ -297,6 +294,7 @@ const ChattingLog = () => {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
             </div>
@@ -330,7 +328,7 @@ const ChattingLog = () => {
         </div>
         <button
           type="submit"
-          className="bg-button rounded-3xl text-white px-4 py-2 font-semibold focus:outline-none hover:bg-red-300 transition-colors duration-300"
+          className="bg-button rounded-3xl text-white px-4 ml-2 py-2 font-semibold focus:outline-none hover:bg-red-300 transition-colors duration-300"
         >
           Ask
         </button>

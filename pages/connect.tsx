@@ -9,18 +9,16 @@ import {
   doc,
   setDoc,
   deleteDoc,
-  getDoc,
   getDocs,
-  updateDoc,
-  arrayUnion
 } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faCircleCheck,
+  faCircleExclamation,
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
-
+import { Tooltip } from "@nextui-org/react";
 const ConnectDatabasePage: React.FC = () => {
   const router = useRouter();
   const [dbname, setDBName] = useState("");
@@ -36,44 +34,27 @@ const ConnectDatabasePage: React.FC = () => {
   const saveInfoToFirestore = async (info) => {
     try {
       if (currentuser.uid) {
-        // Get the Firestore reference for the user's document
-        const userDocRef = doc(collection(db, "databaseList"), currentuser.uid);
-        const userDocSnapshot = await getDoc(userDocRef);
-  
-        // Check if the user document exists
-        if (userDocSnapshot.exists()) {
-          // If the document exists, update the "databases" array with the new info
-          const existingData = userDocSnapshot.data();
-          const databasesArray = existingData.databases || [];
-  
-          if (databasesArray.length >= 10) {
-            // Display the error message and return without saving the info
-            setError("You have reached the limit");
-            return;
-          }
-  
-          const date = new Date();
-          const infoWithIdAndDate = { ...info, createdDate: date };
-          
-          // Use arrayUnion to add the new info to the existing array without duplicates
-          await updateDoc(userDocRef, {
-            databases: arrayUnion(infoWithIdAndDate),
-          });
-        } else {
-          // If the user document doesn't exist, create a new one with the "databases" array containing the new info
-          const date = new Date();
-          const infoWithIdAndDate = { ...info, createdDate: date };
-  
-          await setDoc(userDocRef, { databases: [infoWithIdAndDate] });
+        const infoCollectionRef = collection(
+          db,
+          "databaseInformation",
+          currentuser.uid,
+          "infoCollection"
+        );
+        const querySnapshot = await getDocs(infoCollectionRef);
+        if (querySnapshot.size >= 10) {
+          setError("You have reached the limit");
+          return;
         }
-  
+        const date = new Date();
+        const newDocRef = doc(infoCollectionRef);
+        const infoWithId = { ...info, id: newDocRef.id, createdAt: date };
+        await setDoc(newDocRef, infoWithId);
         setError("");
       }
     } catch (error) {
       console.error("Error saving info object:", error);
     }
   };
-  
 
   interface Entry {
     table_name: string;
@@ -100,31 +81,29 @@ const ConnectDatabasePage: React.FC = () => {
 
   const handleOpenModal = async (uid) => {
     try {
-      // Get the Firestore reference for the user's document
-      const userDocRef = doc(collection(db, "databaseList"), uid);
-  
-      // Fetch the data from the user's document
-      const userDocSnapshot = await getDoc(userDocRef);
-  
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-        // Check if the "databases" array exists in the document
-        if (userData && userData.databases) {
-          return userData.databases;
-        } else {
-          // If the "databases" array doesn't exist or is empty, return an empty array
-          return [];
-        }
-      } else {
-        // If the user document doesn't exist, return an empty array
-        return [];
-      }
+      // Get the Firestore reference for the user's info collection
+      const infoCollectionRef = collection(
+        db,
+        "databaseInformation",
+        uid,
+        "infoCollection"
+      );
+
+      // Fetch the data from the subcollection
+      const querySnapshot = await getDocs(infoCollectionRef);
+      const savedData = [];
+
+      querySnapshot.forEach((doc) => {
+        // Add each document's data to the savedData array
+        savedData.push(doc.data());
+      });
+
+      return savedData;
     } catch (error) {
       console.error("Error fetching saved data:", error);
       return [];
     }
   };
-  
   const handleFetchSavedData = async () => {
     if (currentuser?.uid) {
       const savedData = await handleOpenModal(currentuser.uid);
@@ -132,36 +111,27 @@ const ConnectDatabasePage: React.FC = () => {
       setModalOpen(true);
     }
   };
-  const handleDelete = async (index) => {
+  const handleDelete = async (index, docId) => {
     try {
       // Remove the item from the savedData state
       const updatedData = savedData.filter((_, i) => i !== index);
       setSavedData(updatedData);
-  
-      if (currentuser?.uid) {
-        // Get the Firestore reference for the user's document
-        const userDocRef = doc(collection(db, "databaseList"), currentuser.uid);
-  
-        // Fetch the user's document
-        const userDocSnapshot = await getDoc(userDocRef);
-  
-        if (userDocSnapshot.exists()) {
-          const userData = userDocSnapshot.data();
-          if (userData && userData.databases) {
-            // Remove the item from the "databases" array based on its index
-            userData.databases.splice(index, 1);
-  
-            // Update the user's document with the modified "databases" array
-            await setDoc(userDocRef, { databases: userData.databases });
-          }
-        }
-      }
+
+      // Get the Firestore reference for the user's info collection
+      const infoCollectionRef = collection(
+        db,
+        "databaseInformation",
+        currentuser.uid,
+        "infoCollection"
+      );
+
+      // Delete the corresponding document from the subcollection in Firestore
+      await deleteDoc(doc(infoCollectionRef, docId));
     } catch (error) {
       console.error("Error deleting item:", error);
     }
   };
-  
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const info = { user, password, host, port, dbname };
@@ -174,12 +144,49 @@ const ConnectDatabasePage: React.FC = () => {
         body: JSON.stringify(info),
       });
       if (response.ok) {
+        const userDocRef = doc(db, "databaseInformation", currentuser.uid);
+        const databasesCollectionRef = collection(userDocRef, "infoCollection");
+        const querySnapshot = await getDocs(databasesCollectionRef);
+
+        const exists = querySnapshot.docs.some((doc) => {
+          const data = doc.data();
+          return (
+            data.dbname === info.dbname &&
+            data.user === info.user &&
+            data.host === info.host &&
+            data.port === info.port
+          );
+        });
+
+        if (exists) {
+          setError("");
+          const matchingDoc = querySnapshot.docs.find((doc) => {
+            const data = doc.data();
+            return (
+              data.user === info.user &&
+              data.password === info.password &&
+              data.host === info.host &&
+              data.port === info.port &&
+              data.dbname === info.dbname
+            );
+          });
+          if (matchingDoc) {
+            localStorage.setItem("dbID", JSON.stringify(matchingDoc.id));
+          }
+        } else {
+          localStorage.removeItem("dbID");
+          setError(
+            "The database is not exist in Firestore, the conversation will not be saved"
+          );
+          setTimeout(() => {
+            setError("");
+          }, 3000); // 3000 milliseconds (3 seconds)
+        }
         const data = await response.json();
         if (data.length > 0) {
           const newData = transformDataToCSV(data);
           localStorage.setItem("tableData", JSON.stringify(newData));
           localStorage.setItem("info", JSON.stringify(info));
-          setError("");
           router.push("/connected");
         } else {
           setError("Database is empty");
@@ -207,7 +214,7 @@ const ConnectDatabasePage: React.FC = () => {
               <div>
                 <label className="">Database name</label>
                 <input
-                  className="border-2 rounded-xl w-full px-2"
+                  className="border-2 rounded-xl w-full px-2 py-1 outline-none"
                   type="text"
                   value={dbname}
                   onChange={(e) => setDBName(e.target.value)}
@@ -216,7 +223,7 @@ const ConnectDatabasePage: React.FC = () => {
               <div>
                 <label className="block">Username</label>
                 <input
-                  className="border-2 rounded-xl w-full px-2"
+                  className="border-2 rounded-xl w-full px-2 py-1 outline-none"
                   type="text"
                   value={user}
                   onChange={(e) => setUser(e.target.value)}
@@ -225,7 +232,7 @@ const ConnectDatabasePage: React.FC = () => {
               <div>
                 <label className="block">Password</label>
                 <input
-                  className="border-2 rounded-xl w-full px-2"
+                  className="border-2 rounded-xl w-full px-2 py-1 outline-none"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -234,7 +241,7 @@ const ConnectDatabasePage: React.FC = () => {
               <div>
                 <label className="block">Hostname</label>
                 <input
-                  className="border-2 rounded-xl w-full px-2"
+                  className="border-2 rounded-xl w-full px-2 py-1 outline-none"
                   type="text"
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
@@ -243,7 +250,7 @@ const ConnectDatabasePage: React.FC = () => {
               <div>
                 <label className="block">Port</label>
                 <input
-                  className="border-2 rounded-xl w-full px-2"
+                  className="border-2 rounded-xl w-full px-2 py-1 outline-none"
                   type="text"
                   value={port}
                   onChange={(e) => setPort(e.target.value)}
@@ -270,10 +277,19 @@ const ConnectDatabasePage: React.FC = () => {
               </div>
             </form>
           </div>
-          <div>
+          <div className="flex flex-row items-start justify-center">
+            <div className="mt-8 rounded-full">
+            <Tooltip content="You have to save the database information to store the chat history" color="invert">
+            <FontAwesomeIcon
+                icon={faCircleExclamation}
+                style={{ fontSize: 32 }}
+                className="text-button rounded-full bg-white hover:text-red-300"
+              />
+            </Tooltip>
+            </div>
             <button
               type="button"
-              className="rounded-xl bg-button p-1 mt-8 hover:bg-red-300 outline-none mx-3"
+              className="rounded-full bg-button px-2 py-1 mt-8 hover:bg-red-300 outline-none mx-1"
               onClick={handleFetchSavedData}
             >
               <FontAwesomeIcon
@@ -367,6 +383,7 @@ const ConnectDatabasePage: React.FC = () => {
                             setHost(item.host);
                             setPort(item.port);
                             setDBName(item.dbname);
+                            // setDatabaseID(item.id)
                             setModalOpen(!modalOpen);
                           }}
                         >
@@ -380,7 +397,7 @@ const ConnectDatabasePage: React.FC = () => {
                         <button
                           type="button"
                           className="text-red-500"
-                          onClick={() => handleDelete(index)}
+                          onClick={() => handleDelete(index, item.id)}
                         >
                           <FontAwesomeIcon
                             icon={faTrashCan}

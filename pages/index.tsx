@@ -12,7 +12,7 @@ const Home: React.FC = () => {
         and effort by generating SQL queries automatically. Connect to your
         database, explore tables, and retrieve data effortlessly.
       </div>
-      <button className="rounded-lg bg-button hover:bg-red-300 p-2">
+      <button className="rounded-lg bg-button hover:bg-red-300 p-3">
         <Link
           href={`${currentuser ? "/connect" : "/login"} `}
           className="text-white"
