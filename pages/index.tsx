@@ -7,7 +7,7 @@ const Home: React.FC = () => {
       <div className="text-center font-bold text-2xl sm:text-3xl">
         Simplify Your Database Queries
       </div>
-      <div className="w-full md:w-7/12 text-center p-6 text-slate-400">
+      <div className="w-full md:w-8/12 text-center p-6 text-slate-400">
         AutoSQL is a powerful tool that simplifies database querying. Save time
         and effort by generating SQL queries automatically. Connect to your
         database, explore tables, and retrieve data effortlessly.

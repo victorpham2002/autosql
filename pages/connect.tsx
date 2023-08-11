@@ -30,7 +30,7 @@ const ConnectDatabasePage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [savedData, setSavedData] = useState<any[]>([]);
   const { currentuser } = useAuth();
-
+  const [isLoading, setLoading] = useState(false)
   const saveInfoToFirestore = async (info) => {
     try {
       if (currentuser.uid) {
@@ -134,6 +134,7 @@ const ConnectDatabasePage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     const info = { user, password, host, port, dbname };
     try {
       const response = await fetch("/api/connect", {
@@ -187,15 +188,19 @@ const ConnectDatabasePage: React.FC = () => {
           const newData = transformDataToCSV(data);
           localStorage.setItem("tableData", JSON.stringify(newData));
           localStorage.setItem("info", JSON.stringify(info));
+          setLoading(false)
           router.push("/connected");
         } else {
+          setLoading(false)
           setError("Database is empty");
         }
       } else {
+        setLoading(false)
         const errorData = await response.json();
         setError(errorData.error);
       }
     } catch (error) {
+      setLoading(false)
       console.error("Error fetching data:", error);
       setError("An error occurred. Please try again.");
     }
@@ -205,6 +210,28 @@ const ConnectDatabasePage: React.FC = () => {
     <div className="flex items-center justify-center flex-col h-screen w-screen">
       <div className="flex flex-col items-center bg-background w-full rounded-xl min-[540px]:w-1/2">
         <div className="flex flex-row">
+          <div className="flex flex-row items-start justify-center invisible">
+          <div className="mt-8 rounded-full">
+            <Tooltip content="You have to save the database information to store the chat history" color="invert">
+            <FontAwesomeIcon
+                icon={faCircleExclamation}
+                style={{ fontSize: 32 }}
+                className="text-button rounded-full bg-white hover:text-red-300"
+              />
+            </Tooltip>
+            </div>
+            <button
+              type="button"
+              className="rounded-full bg-button px-2 py-1 mt-8 hover:bg-red-300 outline-none mx-1"
+              onClick={handleFetchSavedData}
+            >
+              <FontAwesomeIcon
+                icon={faBars}
+                style={{ fontSize: 18 }}
+                className="text-white"
+              />
+            </button>
+          </div>
           <div className="flex flex-col items-center justify-center">
             <h1 className="text-xl font-semibold mt-6 ">
               Enter your database information
@@ -302,6 +329,14 @@ const ConnectDatabasePage: React.FC = () => {
         </div>
         {error && (
           <div className="w-full text-center text-xl pb-2">{error}</div>
+        )}
+         {isLoading && (
+          <div className="flex items-center text-xl">
+            <div
+              className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-button m-2 "
+            ></div>
+            Connecting...
+          </div>
         )}
       </div>
 
